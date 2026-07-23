@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
+const pool = require("./config/database");
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -18,6 +20,25 @@ app.get("/api/health", (request, response) => {
     status: "ok",
     message: "API funcionando corretamente",
   });
+});
+
+app.get("/api/database-health", async (request, response, next) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        current_database() AS database,
+        current_user AS user,
+        NOW() AS current_time
+    `);
+
+    return response.status(200).json({
+      status: "ok",
+      message: "PostgreSQL conectado corretamente",
+      connection: result.rows[0],
+    });
+  } catch (error) {
+    return next(error);
+  }
 });
 
 app.use((request, response) => {
