@@ -3,9 +3,14 @@ const cors = require("cors");
 require("dotenv").config();
 
 const pool = require("./config/database");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET não configurado no arquivo .env");
+}
 
 app.use(
   cors({
@@ -14,6 +19,8 @@ app.use(
 );
 
 app.use(express.json());
+
+app.use("/api/auth", authRoutes);
 
 app.get("/api/health", (request, response) => {
   return response.status(200).json({
